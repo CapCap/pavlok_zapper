@@ -9,7 +9,7 @@ URL_BASE = "https://app.pavlok.com/unlocked/remotes/{}/zap/{}?message={}"
 
 PAVLOK_API_NAME = os.getenv("PAVLOK_API_NAME", "test")
 
-ZAP_LEVEL = 100
+ZAP_LEVEL = 130
 
 INTERVAL_MINUTES = 30
 
