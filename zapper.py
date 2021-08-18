@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta
 import pytz
 import requests
+from random import randrange
 import time
 
 from util import make_url, rand_minutes
@@ -35,10 +36,14 @@ class ZapTimer:
     def time_to_zap(self) -> bool:
         if self.sleep_time():
             print(f"{self.now()} - It's sleeping time...")
-            self.set_next_time()
             return False
 
-        return self.time_remaining().total_seconds() <= 0
+        if self.time_remaining().total_seconds() <= 0:
+            print(f"{self.now()} - It's time! Zapping...")
+            return True
+
+        print(f"{self.now()} - Not time yet ({self.time_remaining()} remaining). Sleeping...")
+        return False
 
 
 class Zapper:
@@ -64,12 +69,11 @@ class Zapper:
         except Exception as e:
             print(f"{self.now()} - ERROR ZAPPING: {e}")
 
+    def attempt_zapping(self):
+        if self.timer.time_to_zap():
+            self.zap()
+
     def run(self):
         while True:
-            time_left = self.timer.time_remaining()
-            if self.timer.time_to_zap():
-                print(f"{self.now()} - Not time yet ({time_left} remaining). Sleeping...")
-            else:
-                print(f"{self.now()} - It's time! ({time_left}). Zapping...")
-                self.zap()
+            self.attempt_zapping()
             time.sleep(self.sleep_time_s)

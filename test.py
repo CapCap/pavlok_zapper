@@ -1,6 +1,7 @@
 from datetime import datetime
 from dateutil import tz
 import unittest
+from unittest import mock
 from freezegun import freeze_time
 
 from zapper import Zapper, ZapTimer
@@ -64,6 +65,39 @@ class TestZapTimer(unittest.TestCase):
                 timer = make_timer()
                 d = timer.get_next_time() - timer.now()
                 self.assertTrue(27 <= (d.seconds / 60) < 30)
+
+
+def make_zapper():
+    timer = make_timer()
+    return Zapper(timer, api_name="testing", zap_level=101, message="some space")
+
+
+class TestZapper(unittest.TestCase):
+    @mock.patch("zapper.requests.get")
+    def test_doesnt_zap_before_expired(self, mocked: mock.Mock):
+        with freeze_time(parse_time("2021-01-01 12:00:00")):
+            zapper = make_zapper()
+            self.assertGreater((zapper.timer.next_time - zapper.timer.now()).seconds / 60, 10)
+            zapper.attempt_zapping()
+            mocked.assert_not_called()
+
+    @mock.patch("zapper.requests.get")
+    def test_doesnt_zap_when_sleeping(self, mocked: mock.Mock):
+        with freeze_time(parse_time("2021-01-01 5:00:00")):
+            zapper = make_zapper()
+            self.assertGreater((zapper.timer.next_time - zapper.timer.now()).seconds / 60, 10)
+            zapper.attempt_zapping()
+            mocked.assert_not_called()
+
+    @mock.patch("zapper.requests.get")
+    def test_zaps_when_expired(self, mocked: mock.Mock):
+        with freeze_time(parse_time("2021-01-01 12:00:00")):
+            zapper = make_zapper()
+            zapper.timer.next_time = zapper.timer.now()
+            self.assertLess((zapper.timer.next_time - zapper.timer.now()).seconds / 60, 10)
+            zapper.attempt_zapping()
+            mocked.assert_called_with("https://app.pavlok.com/unlocked/remotes/testing/zap/101?message=some+space")
+            self.assertGreater((zapper.timer.next_time - zapper.timer.now()).seconds / 60, 10)
 
 
 if __name__ == '__main__':
