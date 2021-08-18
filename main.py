@@ -18,8 +18,12 @@ TIMEZONE = os.getenv("PAVLOK_TIMEZONE", "US/Pacific")
 ASLEEP_BEFORE_HOUR = int(os.getenv("PAVLOK_ASLEEP_BEFORE_HOUR", 9))
 ASLEEP_AFTER_HOUR = int(os.getenv("PAVLOK_ASLEEP_AFTER_HOUR", 21))
 
+SLEEP_TIME_S = int(os.getenv("PAVLOK_SLEEP_TIME_S", 10))
+
 
 def main():
+    print("==== STARTING ZAPPER! ====")
+
     timer = ZapTimer(
         timezone_str=TIMEZONE,
         interval_minutes=INTERVAL_MINUTES,
@@ -32,7 +36,10 @@ def main():
            api_name=API_NAME,
            zap_level=ZAP_LEVEL,
            message=MESSAGE,
+           sleep_time_s=SLEEP_TIME_S
            ).run()
+
+    print("==== ZAPPER STOPPED! ====")
 
 
 if __name__ == "__main__":
