@@ -1,2 +1,5 @@
 pytz
 requests
+python-dotenv
+freezegun
+python-dateutil
