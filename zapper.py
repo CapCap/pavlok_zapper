@@ -28,7 +28,8 @@ class ZapTimer:
         self.next_time = self.get_next_time()
 
     def sleep_time(self) -> bool:
-        return self.next_time.hour < self.sleep_hour_before or self.next_time.hour > self.sleep_hour_after
+        now = self.now()
+        return now.hour < self.sleep_hour_before or now.hour >= self.sleep_hour_after
 
     def time_remaining(self):
         return self.next_time - self.now()
